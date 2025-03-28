@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "6kGaJYjW+PI=",
+  "success": true,
+  "projectFilePath": "/Users/chendavid/0328/net-workflow/workflow.Api/workflow.Api.csproj",
+  "expectedPackageFiles": [
+    "/Users/chendavid/.nuget/packages/microsoft.aspnetcore.openapi/9.0.0/microsoft.aspnetcore.openapi.9.0.0.nupkg.sha512",
+    "/Users/chendavid/.nuget/packages/microsoft.openapi/1.6.17/microsoft.openapi.1.6.17.nupkg.sha512"
+  ],
+  "logs": []
+}

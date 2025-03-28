@@ -1,34 +1,31 @@
-name: dotnet package
+name: dotnet-package-docker
 
 on: [push]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        dotnet-version: [ '3.1.x', '9.0.x' ]
+
+    # 使用官方 dotnet SDK 9.0 的 Docker 映像檔
+    container:
+      image: mcr.microsoft.com/dotnet/sdk:9.0
 
     steps:
-        - uses: actions/checkout@v4
-        - name: Setup dotnet
-          uses: actions/setup-dotnet@v4
-          with:
-            dotnet-version: ${{ matrix.dotnet-version }}
-        - name: Install libssl (for .NET 9.0 compatibility)
-          run: |
-              sudo apt-get update
-              sudo apt-get install -y libssl3 || sudo apt-get install -y libssl1.1
-    
-        - name: Install dependencies
-          run: dotnet restore
-        - name: Test with dotnet
-          run: dotnet test --no-restore --logger trx --results-directory "TestResults-${{ matrix.dotnet-version }}"
-        - name: Upload dotnet test results
-          uses: actions/upload-artifact@v4
-          with:
-            name: dotnet-results-${{ matrix.dotnet-version }}
-            path: TestResults-${{ matrix.dotnet-version }}
-          # Use always() to always run this step to publish test results when there are test failures
-          if: ${{ always() }}
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build project
+        run: dotnet build --no-restore
+
+      - name: Run tests
+        run: dotnet test --no-build --logger trx --results-directory TestResults
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: test-results
+          path: TestResults

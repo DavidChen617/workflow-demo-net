@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dotnet-version: [ '3.1.x', '8.0.x' ]
+        dotnet-version: [ '3.1.x', '9.0.x' ]
 
     steps:
         - uses: actions/checkout@v4
@@ -16,6 +16,11 @@ jobs:
           uses: actions/setup-dotnet@v4
           with:
             dotnet-version: ${{ matrix.dotnet-version }}
+        - name: Install libssl (for .NET 9.0 compatibility)
+          run: |
+              sudo apt-get update
+              sudo apt-get install -y libssl3 || sudo apt-get install -y libssl1.1
+    
         - name: Install dependencies
           run: dotnet restore
         - name: Test with dotnet

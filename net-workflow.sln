@@ -1,8 +1,10 @@
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "workflow.Api", "workflow.Api\workflow.Api.csproj", "{6ADC4AC6-BE37-2044-EB9C-30DD82199265}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "workflow.Test", "workflow.Test\workflow.Test.csproj", "{62BD5E38-02C9-40E8-81DD-52BB5C780063}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -14,6 +16,10 @@ Global
 		{6ADC4AC6-BE37-2044-EB9C-30DD82199265}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6ADC4AC6-BE37-2044-EB9C-30DD82199265}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6ADC4AC6-BE37-2044-EB9C-30DD82199265}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62BD5E38-02C9-40E8-81DD-52BB5C780063}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62BD5E38-02C9-40E8-81DD-52BB5C780063}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62BD5E38-02C9-40E8-81DD-52BB5C780063}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62BD5E38-02C9-40E8-81DD-52BB5C780063}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

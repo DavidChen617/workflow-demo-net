@@ -2,3 +2,5 @@ workflow.Api/bin/
 workflow.Api/obj/
 workflow.Test/bin/
 workflow.Test/obj/
+PrReviewer/bin/
+PrReviewer/obj/

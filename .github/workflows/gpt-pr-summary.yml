@@ -1,4 +1,4 @@
-name: GPT PR Summary
+name: GPT PR Summary (.NET)
 
 on:
   pull_request_target:
@@ -14,67 +14,35 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Generate PR summary with ChatGPT
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          PR_DIFF_URL: ${{ github.event.pull_request.diff_url }}
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Build C# reviewer
+        run: dotnet build ./PrReviewer
+
+      - name: Fetch PR diff
         run: |
-          echo "📥 Fetching PR diff..."
-
-          n=0
-          until [ $n -ge 5 ]; do
-            curl -s "$PR_DIFF_URL" -o diff.patch
-            if [ -s diff.patch ]; then
-              echo "✅ PR diff 抓取成功（大小 $(wc -c < diff.patch) bytes）"
-              break
-            fi
-            echo "⚠️ diff.patch 還是空的，等待 2 秒後重試（第 $((n+1)) 次）..."
-            n=$((n+1))
-            sleep 2
-          done
+          echo "📥 Fetching diff with git..."
+          git fetch origin ${{ github.base_ref }}
+          git diff origin/${{ github.base_ref }}...HEAD > diff.patch
 
           if [ ! -s diff.patch ]; then
-            echo "❌ 最終仍無法取得 PR diff，停止工作流程。"
+            echo "❌ diff.patch 是空的，沒有檔案差異可分析"
             exit 1
           fi
 
-          echo "📄 處理 diff 為 GPT 可讀格式..."
-          DIFF_CONTENT=$(jq -Rs . < diff.patch)
-          echo "🧾 DIFF_CONTENT（預處理後）:"
-          echo "$DIFF_CONTENT"
+      - name: Run GPT PR Reviewer
+        run: dotnet run --project ./PrReviewer
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
-          echo "📦 組裝發送給 GPT 的 JSON..."
-          REQUEST_BODY=$(jq -n --argjson diff "$DIFF_CONTENT" '{
-            model: "gpt-4",
-            messages: [
-              { "role": "system", "content": "你是一位資深工程助理，請簡要總結下面的 PR 差異：" },
-              { "role": "user", "content": $diff }
-            ],
-            temperature: 0.7
-          }')
-
-          echo "🚀 呼叫 OpenAI API..."
-          echo "$REQUEST_BODY"
-
-          RESPONSE=$(echo "$REQUEST_BODY" | curl -s https://api.openai.com/v1/chat/completions \
-            -H "Authorization: Bearer $OPENAI_API_KEY" \
-            -H "Content-Type: application/json" \
-            -d @-)
-
-          echo "🧠 OpenAI 回應："
-          echo "$RESPONSE"
-
-          SUMMARY=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // "⚠️ GPT 沒有回應內容"')
-
-          echo "📋 GPT PR 總結："
-          echo "$SUMMARY"
-
-          echo "💬 發送留言到 PR..."
-          COMMENT=$(jq -n --arg body "🧠 GPT 自動總結：\n\n$SUMMARY" '{ body: $body }')
-
-          curl -s -X POST \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d "$COMMENT" \
-            "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
+      - name: Upload summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: gpt-summary
+          path: output.txt

@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "workflow.Api", "workflow.Ap
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "workflow.Test", "workflow.Test\workflow.Test.csproj", "{62BD5E38-02C9-40E8-81DD-52BB5C780063}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrReviewer", "PrReviewer\PrReviewer.csproj", "{A895E797-C336-412C-AB19-3BFD29B6AC02}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,6 +22,10 @@ Global
 		{62BD5E38-02C9-40E8-81DD-52BB5C780063}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{62BD5E38-02C9-40E8-81DD-52BB5C780063}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{62BD5E38-02C9-40E8-81DD-52BB5C780063}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A895E797-C336-412C-AB19-3BFD29B6AC02}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A895E797-C336-412C-AB19-3BFD29B6AC02}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A895E797-C336-412C-AB19-3BFD29B6AC02}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A895E797-C336-412C-AB19-3BFD29B6AC02}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

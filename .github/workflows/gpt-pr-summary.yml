@@ -1,8 +1,11 @@
 name: GPT PR Summary
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, synchronize]
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
   generate-summary:
@@ -21,6 +24,9 @@ jobs:
           curl -s $PR_DIFF_URL -o diff.patch
 
           echo "Calling OpenAI..."
+
+          DIFF_CONTENT=$(jq -Rs . < diff.patch)
+          
           SUMMARY=$(curl https://api.openai.com/v1/chat/completions \
             -s \
             -H "Authorization: Bearer $OPENAI_API_KEY" \
@@ -30,11 +36,11 @@ jobs:
               "messages": [
                 {
                   "role": "system",
-                  "content": "你是一位軟體工程師助理，請閱讀以下 PR 差異並總結內容："
+                  "content": "你是一位資深工程助理，請簡要總結下面的 PR 差異："
                 },
                 {
                   "role": "user",
-                  "content": "'"$(cat diff.patch | head -c 5000)"'"
+                  "content": "$DIFF_CONTENT"
                 }
               ],
               "temperature": 0.7

@@ -1,18 +1,23 @@
 ﻿// Program.cs
-using System.Net.Http.Headers;
+using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
-using System.Diagnostics;
 
 string openAiApiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? throw new Exception("OPENAI_API_KEY not found");
-string[] allowedExtensions = new[] { ".cs", ".ts", ".js" }; // 可自行調整
+string head = Environment.GetEnvironmentVariable("GITHUB_HEAD_REF") ?? throw new Exception("GITHUB_HEAD_REF not found");
+string @base = Environment.GetEnvironmentVariable("GITHUB_BASE_REF") ?? throw new Exception("GITHUB_BASE_REF not found");
+
+Console.WriteLine($"🔧 GITHUB_BASE_REF: {@base}");
+Console.WriteLine($"🔧 GITHUB_HEAD_REF: {head}");
+
+string[] allowedExtensions = new[] { ".cs", ".ts", ".js" };
 
 Console.WriteLine("🔍 Fetching changed files...");
 
 ProcessStartInfo psi = new()
 {
     FileName = "git",
-    Arguments = "diff --name-only origin/${GITHUB_BASE_REF}...origin/${GITHUB_HEAD_REF}",
+    Arguments = $"diff --name-only origin/{@base}...origin/{head}",
     RedirectStandardOutput = true,
     UseShellExecute = false
 };
@@ -39,7 +44,7 @@ if (changedFiles.Count == 0)
 Console.WriteLine($"📁 {changedFiles.Count} file(s) matched extensions: {string.Join(", ", changedFiles)}");
 
 var httpClient = new HttpClient();
-httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", openAiApiKey);
+httpClient.DefaultRequestHeaders.Authorization = new("Bearer", openAiApiKey);
 var outputBuilder = new StringBuilder();
 
 foreach (var file in changedFiles)
@@ -58,7 +63,7 @@ foreach (var file in changedFiles)
         continue;
     }
 
-    string fileDiff = GetFileDiff(file);
+    string fileDiff = GetFileDiff(file, @base, head);
     if (string.IsNullOrWhiteSpace(fileDiff))
     {
         Console.WriteLine("⚠️  No diff found, skip.");
@@ -97,12 +102,12 @@ foreach (var file in changedFiles)
 await File.WriteAllTextAsync("output.txt", outputBuilder.ToString());
 Console.WriteLine("💾 所有分析結果已寫入 output.txt");
 
-static string GetFileDiff(string filePath)
+static string GetFileDiff(string filePath, string @base, string head)
 {
     ProcessStartInfo psi = new()
     {
         FileName = "git",
-        Arguments = $"diff origin/${{GITHUB_BASE_REF}}...origin/${{GITHUB_HEAD_REF}} -- {filePath}",
+        Arguments = $"diff origin/{@base}...origin/{head} -- {filePath}",
         RedirectStandardOutput = true,
         UseShellExecute = false
     };

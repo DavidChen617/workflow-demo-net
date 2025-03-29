@@ -7,11 +7,17 @@ using Microsoft.AspNetCore.Mvc;
 namespace workflow.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     public class TestController : ControllerBase
     {
         [HttpGet]
         public IActionResult Get()
+        {
+            return Ok("Nothing to see here");
+        }
+
+        [HttpGet("test")]
+        public IActionResult Test()
         {
             return Ok("Nothing to see here");
         }

@@ -117,3 +117,5 @@ static string GetFileDiff(string filePath, string @base, string head)
     process.WaitForExit();
     return diff;
 }
+
+

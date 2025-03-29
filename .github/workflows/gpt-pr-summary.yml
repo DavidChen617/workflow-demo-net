@@ -34,6 +34,7 @@ jobs:
         run: dotnet run --project ./PrReviewer
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_HEAD_REF: ${{ github.head_ref }}
           GITHUB_BASE_REF: ${{ github.base_ref }}
 
@@ -43,7 +44,7 @@ jobs:
           name: gpt-summary
           path: output.txt
 
-          
+
 
 
 

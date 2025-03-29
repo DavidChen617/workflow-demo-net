@@ -40,5 +40,11 @@ namespace workflow.Api.Controllers
             return Ok("Nothing to see here");
         }
 
+        [HttpGet("test5")]
+        public IActionResult Test5()
+        {
+            return Ok("Nothing to see here");
+        }
+
     }
 }

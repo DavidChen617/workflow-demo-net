@@ -27,29 +27,5 @@ namespace workflow.Api.Controllers
         {
             return Ok("Nothing to see here");
         }
-
-        [HttpGet("test3")]
-        public IActionResult Test3()
-        {
-            return Ok("Nothing to see here");
-        }
-
-        [HttpGet("test4")]
-        public IActionResult Test4()
-        {
-            return Ok("Nothing to see here");
-        }
-
-        [HttpGet("test5")]
-        public IActionResult Test5()
-        {
-            return Ok("Nothing to see here");
-        }
-
-        [HttpGet("test6")]
-        public IActionResult Test6()
-        {
-            return Ok("Nothing to see here");
-        }
     }
 }

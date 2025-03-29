@@ -24,6 +24,11 @@ jobs:
 
       - name: Build C# reviewer
         run: dotnet build ./PrReviewer
+        
+      - name: Fetch base and head branches
+        run: |
+          git fetch origin ${{ github.base_ref }}
+          git fetch origin ${{ github.head_ref }}
 
       - name: Run GPT PR Reviewer
         run: dotnet run --project ./PrReviewer
@@ -37,3 +42,7 @@ jobs:
         with:
           name: gpt-summary
           path: output.txt
+
+
+
+

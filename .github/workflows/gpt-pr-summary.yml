@@ -25,7 +25,9 @@ jobs:
 
           echo "Calling OpenAI..."
 
-          DIFF_CONTENT=$(jq -Rs . < diff.patch)
+          DIFF_CONTENT=$(cat diff.patch)
+          echo "🧾 以下是實際送給 GPT 的 PR 差異內容（diff）："
+          echo "$DIFF_CONTENT"
 
           RESPONSE=$(jq -n --arg diff "$DIFF_CONTENT" '{
             model: "gpt-4",

@@ -20,39 +20,46 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           PR_DIFF_URL: ${{ github.event.pull_request.diff_url }}
         run: |
-          echo "Fetching PR diff..."
+          echo "📥 Fetching PR diff..."
           curl -s "$PR_DIFF_URL" -o diff.patch
 
-          echo "Calling OpenAI..."
+          echo "📄 Reading diff..."
+          DIFF_CONTENT=$(jq -Rs . < diff.patch)  # ✅ 保留多行結構
 
-          DIFF_CONTENT=$(cat diff.patch)
-          echo "🧾 以下是實際送給 GPT 的 PR 差異內容（diff）："
+          echo "🧾 DIFF_CONTENT（預處理後）:"
           echo "$DIFF_CONTENT"
 
-          RESPONSE=$(jq -n --arg diff "$DIFF_CONTENT" '{
+          echo "📦 組裝發送給 GPT 的 JSON..."
+          REQUEST_BODY=$(jq -n --argjson diff "$DIFF_CONTENT" '{
             model: "gpt-4",
             messages: [
-              { role: "system", content: "你是一位資深工程助理，請簡要總結下面的 PR 差異：" },
-              { role: "user", content: $diff }
+              { "role": "system", "content": "你是一位資深工程助理，請簡要總結下面的 PR 差異：" },
+              { "role": "user", "content": $diff }
             ],
             temperature: 0.7
-          }' | curl -s https://api.openai.com/v1/chat/completions \
+          }')
+
+          echo "🚀 送出請求到 OpenAI..."
+          echo "$REQUEST_BODY"  # ✅ 顯示實際送進去的資料
+
+          RESPONSE=$(echo "$REQUEST_BODY" | curl -s https://api.openai.com/v1/chat/completions \
             -H "Authorization: Bearer $OPENAI_API_KEY" \
             -H "Content-Type: application/json" \
             -d @-)
 
-          echo "🧠 OpenAI 回應原始資料："
+          echo "🧠 OpenAI 回應："
           echo "$RESPONSE"
 
           SUMMARY=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // "⚠️ GPT 沒有回應內容"')
 
-          echo "PR Summary:"
+          echo "📋 GPT PR 總結："
           echo "$SUMMARY"
 
+          echo "💬 發送留言到 PR..."
+          COMMENT=$(jq -n --arg body "🧠 GPT 自動總結：\n\n$SUMMARY" '{ body: $body }')
 
-          echo "Commenting on PR..."
           curl -s -X POST \
             -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             -H "Content-Type: application/json" \
-            -d "{\"body\": \"🧠 GPT 自動總結：\n\n$SUMMARY\"}" \
+            -d "$COMMENT" \
             "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"

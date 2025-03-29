@@ -1,7 +1,7 @@
 name: GPT PR Summary
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, synchronize]
 
 permissions:
@@ -21,11 +21,26 @@ jobs:
           PR_DIFF_URL: ${{ github.event.pull_request.diff_url }}
         run: |
           echo "📥 Fetching PR diff..."
-          curl -s "$PR_DIFF_URL" -o diff.patch
 
-          echo "📄 Reading diff..."
-          DIFF_CONTENT=$(jq -Rs . < diff.patch)  # ✅ 保留多行結構
+          n=0
+          until [ $n -ge 5 ]; do
+            curl -s "$PR_DIFF_URL" -o diff.patch
+            if [ -s diff.patch ]; then
+              echo "✅ PR diff 抓取成功（大小 $(wc -c < diff.patch) bytes）"
+              break
+            fi
+            echo "⚠️ diff.patch 還是空的，等待 2 秒後重試（第 $((n+1)) 次）..."
+            n=$((n+1))
+            sleep 2
+          done
 
+          if [ ! -s diff.patch ]; then
+            echo "❌ 最終仍無法取得 PR diff，停止工作流程。"
+            exit 1
+          fi
+
+          echo "📄 處理 diff 為 GPT 可讀格式..."
+          DIFF_CONTENT=$(jq -Rs . < diff.patch)
           echo "🧾 DIFF_CONTENT（預處理後）:"
           echo "$DIFF_CONTENT"
 
@@ -39,8 +54,8 @@ jobs:
             temperature: 0.7
           }')
 
-          echo "🚀 送出請求到 OpenAI..."
-          echo "$REQUEST_BODY"  # ✅ 顯示實際送進去的資料
+          echo "🚀 呼叫 OpenAI API..."
+          echo "$REQUEST_BODY"
 
           RESPONSE=$(echo "$REQUEST_BODY" | curl -s https://api.openai.com/v1/chat/completions \
             -H "Authorization: Bearer $OPENAI_API_KEY" \
